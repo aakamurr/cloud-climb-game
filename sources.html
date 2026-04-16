@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Cloud Climb - AI Edition | Source References</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a2a4a; color: #eee; padding: 40px 20px; }
+    h1 { text-align: center; color: #FFD700; margin-bottom: 8px; }
+    h2 { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 32px; font-weight: 400; }
+    .sources { max-width: 800px; margin: 0 auto; }
+    .source { margin-bottom: 12px; font-size: 14px; line-height: 1.6; }
+    .source span { color: #64B5F6; font-weight: 600; margin-right: 8px; }
+    .source a { color: #90CAF9; text-decoration: none; word-break: break-all; }
+    .source a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>The Cloud Climb — AI Edition</h1>
+  <h2>Source References</h2>
+  <div class="sources" id="sourceList"></div>
+  <script>
+    const sources = {
+      1: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/overview-levels.html',
+      2: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/overview-aspects.html',
+      3: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/introduction.html',
+      4: 'https://aws.amazon.com/blogs/machine-learning/beyond-pilots-a-proven-framework-for-scaling-ai-to-production',
+      5: 'https://aws.amazon.com/blogs/machine-learning/governance-by-design-the-essential-guide-for-successful-ai-scaling',
+      6: 'https://aws.amazon.com/blogs/architecture/architecting-for-ai-excellence-aws-launches-three-well-architected-lenses-at-reinvent-2025/',
+      7: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/oca-framework-make-culture-change-stick/introduction.html',
+      8: 'https://aws.amazon.com/blogs/enterprise-strategy/data-governance-in-the-age-of-generative-ai/',
+      9: 'https://aws.amazon.com/blogs/machine-learning/beyond-the-technology-workforce-changes-for-ai',
+      10: 'https://aws.amazon.com/blogs/big-data/data-governance-in-the-age-of-generative-ai/',
+      11: 'https://docs.aws.amazon.com/whitepapers/latest/aws-caf-for-ai/people-perspective-culture-and-change-towards-aiml-first.html',
+      12: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/overview.html',
+      13: 'https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html',
+      14: 'https://docs.aws.amazon.com/whitepapers/latest/aws-caf-for-ai/aws-caf-for-ai.html',
+      15: 'https://aws.amazon.com/bedrock/security-privacy-responsible-ai/',
+      16: 'https://aws.amazon.com/blogs/aws/introducing-amazon-bedrock-agentcore-securely-deploy-and-operate-ai-agents-at-any-scale/',
+      17: 'https://aws.amazon.com/blogs/publicsector/new-ai-ml-solutions-in-aws-govcloud-us-underpin-responsible-innovation/',
+      18: 'https://aws.amazon.com/blogs/migration-and-modernization/move-to-ai-pathway/',
+      19: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-data-considerations-gen-ai/journey.html',
+      20: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-enterprise-ready-gen-ai-platform/introduction.html',
+    };
+    const list = document.getElementById('sourceList');
+    Object.keys(sources).sort((a,b) => a - b).forEach(n => {
+      const div = document.createElement('div');
+      div.className = 'source';
+      div.innerHTML = `<span>[${n}]</span><a href="${sources[n]}" target="_blank" rel="noopener">${sources[n]}</a>`;
+      list.appendChild(div);
+    });
+  </script>
+</body>
+</html>

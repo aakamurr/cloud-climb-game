@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Cloud Climb - AI Edition</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #3d4f5f;
+      color: #eee;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+      gap: 0;
+      padding: 16px;
+    }
+    /* Left panel - 2/3 */
+    .left-panel {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 0;
+      background: transparent;
+      margin-right: 12px;
+    }
+    .left-board-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: #0a2a4a;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+    /* Right panel - 1/3 */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+    }
+    .right-top-panel {
+      background: #0c1e33;
+      border-radius: 20px;
+      padding: 12px;
+      text-align: center;
+    }
+    .right-top-split {
+      display: flex;
+      gap: 12px;
+    }
+    .right-top-half {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .rolls-display {
+      margin-top: 8px;
+      font-size: 32px;
+      font-weight: 700;
+      color: #64B5F6;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .right-bottom-panel {
+      background: #0c1e33;
+      border-radius: 20px;
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .right-panel-header {
+      text-align: center;
+      padding: 12px;
+      border-bottom: 1px solid rgba(233,69,96,0.3);
+      color: #e94560;
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .dyk-header {
+      color: #fff;
+    }
+    .dyk-content {
+      padding: 16px 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #ccc;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .dyk-content p {
+      margin: 0 0 12px 0;
+    }
+    .dyk-sources {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 11px;
+      color: #999;
+    }
+    .dyk-sources strong {
+      color: #aaa;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .dyk-source {
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
+    .dyk-source a {
+      color: #64B5F6;
+      text-decoration: none;
+    }
+    .dyk-source a:hover {
+      text-decoration: underline;
+    }
+    .cite {
+      font-size: 9px;
+      color: #90CAF9;
+      vertical-align: super;
+    }
+    .dyk-icon {
+      font-size: 18px;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    .qr-section {
+      margin-top: auto;
+      padding-top: 12px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .qr-link { display: inline-block; }
+    .qr-code {
+      width: 80px;
+      height: 80px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      border-radius: 4px;
+    }
+    .qr-code:hover { transform: scale(1.05); }
+    .qr-label {
+      font-size: 10px;
+      color: #888;
+      margin-top: 6px;
+    }
+
+    /* Board */
+    .board-wrapper {
+      position: relative;
+      width: min(55vh, 480px);
+      height: min(66vh, 560px);
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 4px;
+      padding: 4px;
+      width: 100%;
+      height: 100%;
+      border: 3px solid #fff;
+      border-radius: 12px;
+      background: #888;
+      overflow: hidden;
+    }
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      margin: 3px;
+      transition: background 0.2s;
+      box-shadow:
+        inset 0 2px 4px rgba(255,255,255,0.6),
+        inset 0 -3px 6px rgba(0,0,0,0.25),
+        0 3px 8px rgba(0,0,0,0.35);
+      background-image: linear-gradient(
+        155deg,
+        rgba(255,255,255,0.55) 0%,
+        rgba(255,255,255,0.2) 25%,
+        rgba(0,0,0,0.0) 50%,
+        rgba(0,0,0,0.18) 100%
+      );
+      background-blend-mode: overlay;
+    }
+    .cell .num {
+      font-size: clamp(26px, 5.5vw, 53px);
+      font-weight: 800;
+      color: #fff;
+      opacity: 0.5;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* Player token */
+    .player-token {
+      width: 38px;
+      height: 44px;
+      position: absolute;
+      z-index: 10;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+
+    /* Dice area */
+    .board-legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ccc;
+    }
+    .legend-swatch {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+    .dice-area {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .dice {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(
+        145deg,
+        #ffffff 0%,
+        #f0f0f0 30%,
+        #d8d8d8 70%,
+        #c0c0c0 100%
+      );
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      box-shadow:
+        inset 0 2px 4px rgba(255,255,255,0.8),
+        inset 0 -3px 6px rgba(0,0,0,0.15),
+        4px 4px 10px rgba(0,0,0,0.3),
+        -2px -2px 6px rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.5);
+      transition: transform 0.1s;
+    }
+    .dice:hover { transform: scale(1.05); }
+    .dice:active { transform: scale(0.95); }
+    .dice.rolling {
+      animation: diceShake 0.12s infinite alternate;
+    }
+    @keyframes diceShake {
+      0% { transform: rotate(-12deg) scale(1.1); }
+      100% { transform: rotate(12deg) scale(1.1); }
+    }
+    .dice-face {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      padding: 4px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      background: #1a1a2e;
+      border-radius: 50%;
+      align-self: center;
+      justify-self: center;
+    }
+    /* Dice face layouts */
+    .face-1 { grid-template: 1fr / 1fr; place-items: center; }
+    .face-2 { grid-template: 1fr 1fr / 1fr; }
+    .face-2 .dot:first-child { justify-self: start; align-self: start; }
+    .face-2 .dot:last-child { justify-self: end; align-self: end; }
+    .face-3 { grid-template: 1fr 1fr 1fr / 1fr; }
+    .face-3 .dot:first-child { justify-self: start; align-self: start; }
+    .face-3 .dot:nth-child(2) { justify-self: center; align-self: center; }
+    .face-3 .dot:last-child { justify-self: end; align-self: end; }
+    .face-4 { grid-template: 1fr 1fr / 1fr 1fr; }
+    .face-5 { grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr; }
+    .face-5 .dot:nth-child(1) { grid-area: 1/1; }
+    .face-5 .dot:nth-child(2) { grid-area: 1/3; }
+    .face-5 .dot:nth-child(3) { grid-area: 2/2; }
+    .face-5 .dot:nth-child(4) { grid-area: 3/1; }
+    .face-5 .dot:nth-child(5) { grid-area: 3/3; }
+    .face-6 { grid-template: 1fr 1fr 1fr / 1fr 1fr; }
+
+    .roll-btn {
+      padding: 12px 28px;
+      background: #e94560;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .roll-btn:hover { background: #c73652; }
+    .roll-btn:active { transform: scale(0.96); }
+    .roll-btn:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      padding: 12px 28px;
+      background: #888;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .reset-btn:hover { background: #6e6e6e; }
+    .reset-btn:active { transform: scale(0.96); }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #aaa;
+      min-height: 20px;
+    }
+
+    .score-display {
+      margin-top: 8px;
+      font-size: 32px;
+      font-weight: 700;
+      color: #FFD54F;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .left-bottom-bar {
+      display: flex;
+      gap: 12px;
+      background: #0c1e33;
+      border-radius: 20px;
+      padding: 14px 20px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bar-btn-group {
+      display: flex;
+      gap: 12px;
+    }
+    .bar-btn {
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.1);
+      color: #ccc;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+      text-align: center;
+    }
+    .bar-btn:hover {
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+    }
+
+    /* Win overlay */
+    .win-overlay {
+      display: none;
+      position: fixed;
+      top: 25%; left: 25%;
+      width: 50%; height: 50%;
+      background: rgba(0,0,0,0.8);
+      border-radius: 20px;
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .win-overlay.active { display: flex; }
+    #fireworksCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border-radius: 20px;
+      z-index: 201;
+      pointer-events: none;
+    }
+    .win-box {
+      position: relative;
+      z-index: 202;
+      text-align: center;
+      animation: winPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes winPop {
+      0% { transform: scale(0.3); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .win-title {
+      font-size: 48px;
+      font-weight: 900;
+      color: #FFD700;
+      text-shadow: 0 0 20px rgba(255,215,0,0.6), 0 4px 8px rgba(0,0,0,0.4);
+      margin-bottom: 12px;
+    }
+    .win-subtitle {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 1px;
+      margin-bottom: 28px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .win-close {
+      padding: 12px 32px;
+      background: #FFD700;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .win-close:hover { background: #ffec6e; }
+    .win-close:active { transform: scale(0.96); }
+    .win-dismiss {
+      padding: 10px 28px;
+      background: transparent;
+      color: #aaa;
+      border: 1px solid #aaa;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 12px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .win-dismiss:hover { color: #fff; border-color: #fff; }
+    .win-stats {
+      font-size: 16px;
+      color: #ccc;
+      margin-bottom: 16px;
+    }
+    .win-name-input {
+      padding: 10px 16px;
+      width: 200px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 16px;
+      outline: none;
+    }
+    .win-name-input::placeholder { color: #888; }
+    .win-raffle-text {
+      font-size: 13px;
+      color: #ccc;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .win-name-input:focus { border-color: #FFD700; }
+    .win-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .win-lb-link {
+      display: inline-block;
+      color: #64B5F6;
+      font-size: 13px;
+      text-decoration: none;
+      margin-top: 4px;
+    }
+    .win-lb-link:hover { text-decoration: underline; }
+
+    /* Trivia icon */
+    .trivia-icon {
+      position: absolute;
+      bottom: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Trivia modal */
+    .trivia-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .trivia-overlay.active { display: flex; }
+    .trivia-box {
+      background: #1e2a45;
+      border: 2px solid #e94560;
+      border-radius: 14px;
+      padding: 28px 32px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .trivia-close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .trivia-close:hover { color: #fff; }
+    .trivia-box h3 {
+      color: #FFB74D;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    .trivia-box p {
+      color: #eee;
+      font-size: 15px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .trivia-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .trivia-opt {
+      padding: 10px 16px;
+      background: #16213e;
+      color: #eee;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .trivia-opt:hover { background: #1a2a50; }
+    .trivia-opt.correct { background: #2e7d32; border-color: #4caf50; }
+    .trivia-opt.wrong { background: #c62828; border-color: #e53935; }
+
+    /* Title */
+    .footer-credit {
+      font-size: 9px;
+      color: #888;
+      letter-spacing: 0.5px;
+    }
+
+    .board-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    /* Legend */
+
+    .board-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <div class="left-board-panel">
+        <div class="board-title">The Cloud Climb — AI Edition</div>
+        <div class="board-wrapper">
+          <div class="board" id="board"></div>
+          <svg class="board-overlay" id="boardOverlay"></svg>
+          <svg class="player-token" id="token" viewBox="0 0 64 72" xmlns="http://www.w3.org/2000/svg">
+            <!-- Antenna -->
+            <line x1="32" y1="18" x2="32" y2="8" stroke="#1B2A4A" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="32" cy="5" r="5" fill="#1B2A4A"/>
+            <circle cx="32" cy="5" r="2.5" fill="#E94560"/>
+            <!-- Ears -->
+            <rect x="2" y="32" width="10" height="18" rx="3" fill="#1B2A4A"/>
+            <rect x="4" y="35" width="6" height="12" rx="2" fill="#9AA5B4"/>
+            <rect x="52" y="32" width="10" height="18" rx="3" fill="#1B2A4A"/>
+            <rect x="54" y="35" width="6" height="12" rx="2" fill="#9AA5B4"/>
+            <!-- Head -->
+            <rect x="10" y="18" width="44" height="38" rx="10" fill="#1B2A4A"/>
+            <rect x="13" y="21" width="38" height="32" rx="8" fill="#E8EEF4"/>
+            <!-- Eyes -->
+            <circle cx="24" cy="38" r="6" fill="#1B2A4A"/>
+            <circle cx="24" cy="37" r="2.5" fill="#B0B8C4"/>
+            <circle cx="40" cy="38" r="6" fill="#1B2A4A"/>
+            <circle cx="40" cy="37" r="2.5" fill="#B0B8C4"/>
+            <!-- Smile -->
+            <path d="M 25 48 Q 32 54 39 48" stroke="#1B2A4A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="board-legend">
+          <div class="legend-item"><span class="legend-swatch" style="background:#5B9BD5"></span>Envision</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#4178B4"></span>Experiment</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#2D5F94"></span>Launch</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#1E4673"></span>Scale</div>
+        </div>
+        <div class="dice-area">
+          <div class="dice" id="dice" role="button" aria-label="Roll dice" tabindex="0">
+            <div class="dice-face face-1" id="diceFace">
+              <div class="dot"></div>
+            </div>
+          </div>
+          <button class="roll-btn" id="rollBtn">Roll Dice</button>
+          <button class="reset-btn" id="resetBtn">Reset</button>
+        </div>
+        <div class="status" id="status" aria-live="polite">Click "Roll Dice" or click the dice to start!</div>
+      </div>
+      <div class="left-bottom-bar">
+        <div class="bar-btn-group">
+          <button class="bar-btn" id="howToPlayBtn">How to Play</button>
+          <a href="leaderboard.html" target="_blank" class="bar-btn">Leaderboard</a>
+        </div>
+        <div class="footer-credit">Made with ❤️ in Kiro</div>
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="right-top-panel">
+        <div class="right-top-split">
+          <div class="right-top-half">
+            <div class="right-panel-header dyk-header">Score</div>
+            <div class="score-display" id="scoreDisplay">0</div>
+          </div>
+          <div class="right-top-half">
+            <div class="right-panel-header dyk-header">Rolls</div>
+            <div class="rolls-display" id="rollsDisplay">0</div>
+          </div>
+        </div>
+      </div>
+      <div class="right-bottom-panel">
+        <div class="right-panel-header dyk-header">Did You Know</div>
+        <div class="dyk-content" id="dykContent"></div>
+        <div class="qr-section">
+          <a href="https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/introduction.html" target="_blank" rel="noopener" class="qr-link">
+            <img id="qrImage" class="qr-code" alt="QR Code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fdocs.aws.amazon.com%2Fprescriptive-guidance%2Flatest%2Fstrategy-gen-ai-maturity-model%2Fintroduction.html" />
+          </a>
+          <div class="qr-label">Scan for all source references</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win-overlay" id="winOverlay">
+    <canvas id="fireworksCanvas"></canvas>
+    <div class="win-box">
+      <div class="win-title">FINISH</div>
+      <div class="win-subtitle" id="winSubtitle"></div>
+      <div class="win-stats" id="winStats"></div>
+      <div class="win-raffle-text">Enter your Name and Email for a chance to enter our raffle and win prizes.</div>
+      <input type="text" id="winName" class="win-name-input" placeholder="Enter your name" maxlength="20" />
+      <input type="email" id="winEmail" class="win-name-input" placeholder="Enter your email" />
+      <div class="win-buttons">
+        <button class="win-close" id="winSave">Save &amp; Play Again</button>
+        <button class="win-dismiss" id="winDismiss">Close</button>
+      </div>
+      <a href="leaderboard.html" target="_blank" class="win-lb-link">View Leaderboard →</a>
+    </div>
+  </div>
+
+  <div class="trivia-overlay" id="htpOverlay">
+    <div class="trivia-box" style="max-width:480px;text-align:left">
+      <button class="trivia-close" id="htpClose" aria-label="Close">&times;</button>
+      <h3 style="text-align:center;color:#FFD700;margin-bottom:16px">How to Play</h3>
+      <div style="color:#ccc;font-size:13px;line-height:1.8">
+        <p>🎲 Roll the dice to move across the board from square 1 to 30.</p>
+        <p>🪜 Land on a ladder to climb up and earn <strong>+5 points</strong>.</p>
+        <p>🐍 Land on a snake to slide down and lose <strong>-1 point</strong>. Each snake only triggers once per game.</p>
+        <p>❓ Land on a trivia square to answer an AI question. Correct = <strong>+3 points</strong>.</p>
+        <p>📖 Every snake and ladder square reveals a "Did You Know" insight in the right panel.</p>
+        <p>🏆 Reach square 30 to finish! Your maturity level depends on your score and number of rolls.</p>
+        <p style="margin-top:8px;color:#888;font-size:11px">🥇 Gold: Score ≥ 10 & Rolls ≤ 20 &nbsp;|&nbsp; 🥈 Silver: Score ≥ 8 or Rolls ≤ 20 &nbsp;|&nbsp; 🥉 Bronze: Everything else</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="trivia-overlay" id="triviaOverlay">
+    <div class="trivia-box">
+      <button class="trivia-close" id="triviaClose" aria-label="Close">&times;</button>
+      <h3>❓ Trivia Question</h3>
+      <p id="triviaQuestion"></p>
+      <div class="trivia-options" id="triviaOptions"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- Snakes & Ladders definitions ---
+    const snakes = { 7: 2, 11: 1, 14: 6, 15: 8, 22: 12, 26: 18 };
+    const ladders = { 3: 10, 9: 16, 13: 20, 17: 24, 21: 29, 23: 28 };
+    const TOTAL_SQUARES = 30;
+    const COLS = 5;
+    const ROWS = 6;
+
+    let playerPos = 0;
+    let isRolling = false;
+    const usedSnakes = new Set();
+    let triviaScore = 0;
+    let diceRolls = 0;
+
+    // --- Build the board ---
+    const board = document.getElementById('board');
+    const cells = {};
+
+    const BOARD_COLORS = [
+      '#5BC8E8', // cyan
+      '#F7D84B', // yellow
+      '#4CD964', // green
+      '#FF9F43', // orange
+      '#A855F7', // purple
+      '#FF6B8A', // pink
+      '#FF5252', // coral red
+      '#3B82F6', // blue
+      '#2ECC71', // emerald
+      '#E879A8', // magenta
+      '#FFB347', // light orange
+      '#7C6BF0', // violet
+    ];
+
+    // Fixed color bands by square number
+    function getCellColor(cellNum) {
+      if (cellNum === 30) return '#1E4673';
+      if (cellNum <= 7) return '#5B9BD5';   // lightest blue - Envision
+      if (cellNum <= 14) return '#4178B4';  // medium blue - Experiment
+      if (cellNum <= 21) return '#2D5F94';  // darker blue - Launch
+      return '#1E4673';                      // deepest blue - Scale
+    }
+
+    const TRIVIA_SQUARES = new Set([4, 5, 19, 25, 27]);
+
+    // Build color grid
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const actualRow = (ROWS - 1) - row;
+        const isEvenRow = actualRow % 2 === 0;
+        const cellNum = isEvenRow
+          ? actualRow * COLS + col + 1
+          : actualRow * COLS + (COLS - col);
+
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.style.background = getCellColor(cellNum);
+
+        const numSpan = document.createElement('span');
+        numSpan.className = 'num';
+        if (cellNum < TOTAL_SQUARES) {
+          numSpan.textContent = cellNum;
+        }
+        cell.appendChild(numSpan);
+
+        if (TRIVIA_SQUARES.has(cellNum)) {
+          const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          icon.setAttribute('class', 'trivia-icon');
+          icon.setAttribute('viewBox', '0 0 40 40');
+          icon.innerHTML = `
+            <rect x="2" y="2" width="36" height="36" rx="6" fill="#FFB74D" stroke="#F5A623" stroke-width="2"/>
+            <circle cx="7" cy="7" r="2.5" fill="#555"/><circle cx="7" cy="7" r="1.2" fill="#FFE082"/>
+            <circle cx="33" cy="7" r="2.5" fill="#555"/><circle cx="33" cy="7" r="1.2" fill="#FFE082"/>
+            <circle cx="7" cy="33" r="2.5" fill="#555"/><circle cx="7" cy="33" r="1.2" fill="#FFE082"/>
+            <circle cx="33" cy="33" r="2.5" fill="#555"/><circle cx="33" cy="33" r="1.2" fill="#FFE082"/>
+            <text x="20" y="27" text-anchor="middle" font-size="24" font-weight="bold" fill="#FFE082" stroke="#555" stroke-width="2" paint-order="stroke">?</text>
+          `;
+          cell.appendChild(icon);
+        }
+
+        board.appendChild(cell);
+        cells[cellNum] = cell;
+      }
+    }
+
+    // Ladder color themes
+    const LADDER_THEMES = [
+      { rail: '#5C3A1E', rung: '#6E4A2A', grain: '#3E2510' },
+    ];
+
+    function drawLadder(fromCell, toCell, themeIndex) {
+      const svg = document.getElementById('boardOverlay');
+      const boardRect = board.getBoundingClientRect();
+      const fromRect = cells[fromCell].getBoundingClientRect();
+      const toRect = cells[toCell].getBoundingClientRect();
+      const theme = LADDER_THEMES[themeIndex % LADDER_THEMES.length];
+
+      const fromX = fromRect.left - boardRect.left + fromRect.width / 2;
+      const fromY = fromRect.top - boardRect.top + fromRect.height / 2;
+      const toX = toRect.left - boardRect.left + toRect.width / 2;
+      const toY = toRect.top - boardRect.top + toRect.height / 2;
+
+      svg.setAttribute('viewBox', `0 0 ${boardRect.width} ${boardRect.height}`);
+
+      const railOffset = 16;
+      const dx = toX - fromX;
+      const dy = toY - fromY;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const nx = -dy / len * railOffset;
+      const ny = dx / len * railOffset;
+
+      // Left rail
+      const rail1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      rail1.setAttribute('x1', fromX + nx); rail1.setAttribute('y1', fromY + ny);
+      rail1.setAttribute('x2', toX + nx); rail1.setAttribute('y2', toY + ny);
+      rail1.setAttribute('stroke', theme.rail); rail1.setAttribute('stroke-width', '8');
+      rail1.setAttribute('stroke-linecap', 'round');
+
+      // Right rail
+      const rail2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      rail2.setAttribute('x1', fromX - nx); rail2.setAttribute('y1', fromY - ny);
+      rail2.setAttribute('x2', toX - nx); rail2.setAttribute('y2', toY - ny);
+      rail2.setAttribute('stroke', theme.rail); rail2.setAttribute('stroke-width', '8');
+      rail2.setAttribute('stroke-linecap', 'round');
+
+      svg.appendChild(rail1);
+      svg.appendChild(rail2);
+
+      // Rungs
+      const rungCount = 6;
+      for (let i = 0; i <= rungCount; i++) {
+        const t = i / rungCount;
+        const rx = fromX + dx * t;
+        const ry = fromY + dy * t;
+
+        const rung = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        rung.setAttribute('x1', rx + nx * 1.1); rung.setAttribute('y1', ry + ny * 1.1);
+        rung.setAttribute('x2', rx - nx * 1.1); rung.setAttribute('y2', ry - ny * 1.1);
+        rung.setAttribute('stroke', theme.rung); rung.setAttribute('stroke-width', '6');
+        rung.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(rung);
+
+        for (const side of [1, -1]) {
+          const nail = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          nail.setAttribute('cx', rx + nx * side * 0.9);
+          nail.setAttribute('cy', ry + ny * side * 0.9);
+          nail.setAttribute('r', '2.5');
+          nail.setAttribute('fill', '#bbb');
+          svg.appendChild(nail);
+        }
+      }
+
+      // Rail grain overlay
+      for (const side of [1, -1]) {
+        const grain = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        grain.setAttribute('x1', fromX + nx * side); grain.setAttribute('y1', fromY + ny * side);
+        grain.setAttribute('x2', toX + nx * side); grain.setAttribute('y2', toY + ny * side);
+        grain.setAttribute('stroke', theme.grain); grain.setAttribute('stroke-width', '2');
+        grain.setAttribute('stroke-linecap', 'round');
+        grain.setAttribute('opacity', '0.5');
+        svg.appendChild(grain);
+      }
+    }
+
+    // Snake color themes
+    const SNAKE_THEMES = [
+      { body: '#8BC34A', dark: '#4CAF50', spot: '#388E3C', head: '#4CAF50' }, // green
+      { body: '#E57373', dark: '#D32F2F', spot: '#B71C1C', head: '#D32F2F' }, // red
+      { body: '#7E57C2', dark: '#5E35B1', spot: '#4527A0', head: '#5E35B1' }, // purple
+      { body: '#FF9800', dark: '#F57C00', spot: '#E65100', head: '#F57C00' }, // orange
+      { body: '#42A5F5', dark: '#1E88E5', spot: '#1565C0', head: '#1E88E5' }, // blue
+    ];
+
+    // Expression types: 'normal', 'closed', 'wink', 'surprised'
+    function drawSnakeEyes(svg, headX, headY, expression) {
+      const leftX = headX - 5, rightX = headX + 5, eyeY = headY - 5;
+
+      if (expression === 'closed') {
+        // Both eyes closed — happy arcs
+        for (const ox of [leftX, rightX]) {
+          const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          arc.setAttribute('d', `M ${ox - 4} ${eyeY} Q ${ox} ${eyeY - 5}, ${ox + 4} ${eyeY}`);
+          arc.setAttribute('stroke', '#222');
+          arc.setAttribute('stroke-width', '2');
+          arc.setAttribute('fill', 'none');
+          arc.setAttribute('stroke-linecap', 'round');
+          svg.appendChild(arc);
+        }
+      } else if (expression === 'wink') {
+        // Left eye open, right eye winking
+        // Open eye
+        const ew = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        ew.setAttribute('cx', leftX); ew.setAttribute('cy', eyeY);
+        ew.setAttribute('r', '5'); ew.setAttribute('fill', '#fff');
+        svg.appendChild(ew);
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        p.setAttribute('cx', leftX + 1); p.setAttribute('cy', eyeY);
+        p.setAttribute('r', '2.5'); p.setAttribute('fill', '#222');
+        svg.appendChild(p);
+        // Wink eye
+        const wink = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        wink.setAttribute('d', `M ${rightX - 4} ${eyeY} Q ${rightX} ${eyeY + 3}, ${rightX + 4} ${eyeY}`);
+        wink.setAttribute('stroke', '#222');
+        wink.setAttribute('stroke-width', '2');
+        wink.setAttribute('fill', 'none');
+        wink.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(wink);
+      } else if (expression === 'surprised') {
+        // Big round eyes with small pupils
+        for (const ox of [leftX, rightX]) {
+          const ew = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ew.setAttribute('cx', ox); ew.setAttribute('cy', eyeY);
+          ew.setAttribute('r', '6'); ew.setAttribute('fill', '#fff');
+          svg.appendChild(ew);
+          const p = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          p.setAttribute('cx', ox); p.setAttribute('cy', eyeY);
+          p.setAttribute('r', '1.8'); p.setAttribute('fill', '#222');
+          svg.appendChild(p);
+        }
+        // Open mouth
+        const mouth = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        mouth.setAttribute('cx', headX); mouth.setAttribute('cy', headY + 5);
+        mouth.setAttribute('rx', '3'); mouth.setAttribute('ry', '4');
+        mouth.setAttribute('fill', '#222');
+        svg.appendChild(mouth);
+      } else if (expression === 'openmouth') {
+        // Normal eyes with open mouth
+        for (const ox of [leftX, rightX]) {
+          const ew = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ew.setAttribute('cx', ox); ew.setAttribute('cy', eyeY);
+          ew.setAttribute('r', '5'); ew.setAttribute('fill', '#fff');
+          svg.appendChild(ew);
+          const p = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          p.setAttribute('cx', ox + 1); p.setAttribute('cy', eyeY);
+          p.setAttribute('r', '2.5'); p.setAttribute('fill', '#222');
+          svg.appendChild(p);
+        }
+        const om = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        om.setAttribute('cx', headX); om.setAttribute('cy', headY + 6);
+        om.setAttribute('rx', '4'); om.setAttribute('ry', '3');
+        om.setAttribute('fill', '#222');
+        svg.appendChild(om);
+      } else {
+        // Normal eyes
+        for (const ox of [leftX, rightX]) {
+          const ew = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ew.setAttribute('cx', ox); ew.setAttribute('cy', eyeY);
+          ew.setAttribute('r', '5'); ew.setAttribute('fill', '#fff');
+          svg.appendChild(ew);
+          const p = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          p.setAttribute('cx', ox + 1); p.setAttribute('cy', eyeY);
+          p.setAttribute('r', '2.5'); p.setAttribute('fill', '#222');
+          svg.appendChild(p);
+        }
+      }
+    }
+
+    function drawSnake(fromCell, toCell, themeIndex, expression) {
+      const svg = document.getElementById('boardOverlay');
+      const boardRect = board.getBoundingClientRect();
+      const fromRect = cells[fromCell].getBoundingClientRect();
+      const toRect = cells[toCell].getBoundingClientRect();
+      const theme = SNAKE_THEMES[themeIndex % SNAKE_THEMES.length];
+
+      const headX = fromRect.left - boardRect.left + fromRect.width / 2;
+      const headY = fromRect.top - boardRect.top + fromRect.height / 2;
+      const tailX = toRect.left - boardRect.left + toRect.width / 2;
+      const tailY = toRect.top - boardRect.top + toRect.height / 2;
+
+      const dx = tailX - headX;
+      const dy = tailY - headY;
+
+      const cp1x = headX + dx * 0.25 + 30;
+      const cp1y = headY + dy * 0.25;
+      const cp2x = headX + dx * 0.5 - 30;
+      const cp2y = headY + dy * 0.5;
+      const cp3x = headX + dx * 0.75 + 20;
+      const cp3y = headY + dy * 0.75;
+
+      // Body
+      const body = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      body.setAttribute('d', `M ${headX} ${headY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${headX + dx * 0.5} ${headY + dy * 0.5} S ${cp3x} ${cp3y}, ${tailX} ${tailY}`);
+      body.setAttribute('stroke', theme.body);
+      body.setAttribute('stroke-width', '12');
+      body.setAttribute('fill', 'none');
+      body.setAttribute('stroke-linecap', 'round');
+      svg.appendChild(body);
+
+      // Stripe pattern
+      const stripe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      stripe.setAttribute('d', body.getAttribute('d'));
+      stripe.setAttribute('stroke', theme.dark);
+      stripe.setAttribute('stroke-width', '6');
+      stripe.setAttribute('fill', 'none');
+      stripe.setAttribute('stroke-linecap', 'round');
+      stripe.setAttribute('stroke-dasharray', '8 12');
+      svg.appendChild(stripe);
+
+      // Spots
+      for (let t = 0.2; t < 0.9; t += 0.2) {
+        const sx = headX + dx * t + Math.sin(t * 10) * 8;
+        const sy = headY + dy * t;
+        const spot = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        spot.setAttribute('cx', sx); spot.setAttribute('cy', sy);
+        spot.setAttribute('rx', '5'); spot.setAttribute('ry', '4');
+        spot.setAttribute('fill', theme.spot);
+        spot.setAttribute('opacity', '0.6');
+        svg.appendChild(spot);
+      }
+
+      // Head
+      const head = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      head.setAttribute('cx', headX); head.setAttribute('cy', headY);
+      head.setAttribute('r', '10'); head.setAttribute('fill', theme.head);
+      svg.appendChild(head);
+
+      // Eyes & expression
+      drawSnakeEyes(svg, headX, headY, expression);
+
+      // Tail
+      const tail = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      tail.setAttribute('cx', tailX); tail.setAttribute('cy', tailY);
+      tail.setAttribute('r', '4'); tail.setAttribute('fill', theme.body);
+      svg.appendChild(tail);
+    }
+
+    function refreshLadder() {
+      const svg = document.getElementById('boardOverlay');
+      svg.innerHTML = '';
+      const boardRect = board.getBoundingClientRect();
+      svg.setAttribute('viewBox', `0 0 ${boardRect.width} ${boardRect.height}`);
+      drawLadder(9, 16, 0);
+      drawLadder(3, 10, 1);
+      drawLadder(13, 20, 2);
+      drawLadder(17, 24, 3);
+      drawLadder(23, 28, 4);
+      drawLadder(21, 29, 3);
+      drawSnake(7, 2, 0, 'normal');
+      drawSnake(11, 1, 1, 'wink');
+      drawSnake(15, 8, 1, 'openmouth');
+      drawSnake(14, 6, 2, 'surprised');
+      drawSnake(22, 12, 3, 'surprised');
+      drawSnake(26, 18, 4, 'wink');
+      drawFinishBadge();
+    }
+
+    function drawFinishBadge() {
+      const svg = document.getElementById('boardOverlay');
+      const boardRect = board.getBoundingClientRect();
+      const cellRect = cells[TOTAL_SQUARES].getBoundingClientRect();
+      const cx = cellRect.left - boardRect.left + cellRect.width / 2;
+      const cy = cellRect.top - boardRect.top + cellRect.height / 2;
+      const w = cellRect.width * 0.8;
+      const h = cellRect.height * 0.8;
+
+      // Bottom tier (wide, darker blue)
+      const base = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      base.setAttribute('x', cx - w * 0.48); base.setAttribute('y', cy + h * 0.15);
+      base.setAttribute('width', w * 0.96); base.setAttribute('height', h * 0.2);
+      base.setAttribute('rx', '3'); base.setAttribute('fill', '#64B5F6');
+      base.setAttribute('stroke', '#222'); base.setAttribute('stroke-width', '1.5');
+      svg.appendChild(base);
+
+      // Middle tier (medium, lighter blue)
+      const mid = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      mid.setAttribute('x', cx - w * 0.34); mid.setAttribute('y', cy - h * 0.02);
+      mid.setAttribute('width', w * 0.68); mid.setAttribute('height', h * 0.2);
+      mid.setAttribute('rx', '3'); mid.setAttribute('fill', '#90CAF9');
+      mid.setAttribute('stroke', '#222'); mid.setAttribute('stroke-width', '1.5');
+      svg.appendChild(mid);
+
+      // Top tier (narrow, lightest blue)
+      const top = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      top.setAttribute('x', cx - w * 0.2); top.setAttribute('y', cy - h * 0.18);
+      top.setAttribute('width', w * 0.4); top.setAttribute('height', h * 0.18);
+      top.setAttribute('rx', '2'); top.setAttribute('fill', '#BBDEFB');
+      top.setAttribute('stroke', '#222'); top.setAttribute('stroke-width', '1.5');
+      svg.appendChild(top);
+
+      // Decorative lines on tiers
+      for (const [ty, tw] of [[cy + h * 0.22, w * 0.38], [cy + h * 0.05, w * 0.26]]) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', cx - tw); line.setAttribute('y1', ty);
+        line.setAttribute('x2', cx + tw * 0.6); line.setAttribute('y2', ty);
+        line.setAttribute('stroke', '#222'); line.setAttribute('stroke-width', '2');
+        line.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(line);
+        // Dot
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', cx + tw * 0.7); dot.setAttribute('cy', ty);
+        dot.setAttribute('r', '2'); dot.setAttribute('fill', '#222');
+        svg.appendChild(dot);
+      }
+
+      // Gold star on top
+      const starR = w * 0.22;
+      const starCy = cy - h * 0.35;
+      const pts = [];
+      for (let i = 0; i < 5; i++) {
+        const outerAngle = (i * 72 - 90) * Math.PI / 180;
+        const innerAngle = ((i * 72) + 36 - 90) * Math.PI / 180;
+        pts.push(`${cx + Math.cos(outerAngle) * starR},${starCy + Math.sin(outerAngle) * starR}`);
+        pts.push(`${cx + Math.cos(innerAngle) * starR * 0.45},${starCy + Math.sin(innerAngle) * starR * 0.45}`);
+      }
+      const star = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      star.setAttribute('points', pts.join(' '));
+      star.setAttribute('fill', '#F5B342');
+      star.setAttribute('stroke', '#E8A020');
+      star.setAttribute('stroke-width', '1.5');
+      svg.appendChild(star);
+    }
+
+    // Draw after layout settles
+    requestAnimationFrame(() => requestAnimationFrame(refreshLadder));
+    window.addEventListener('resize', () => {
+      positionToken(playerPos);
+      refreshLadder();
+    });
+
+    // --- Position token on a cell ---
+    function positionToken(cellNum) {
+      const token = document.getElementById('token');
+      token.style.display = 'block';
+      if (cellNum <= 0) {
+        // Position just to the left of square 1
+        const cell1 = cells[1];
+        const boardRect = board.getBoundingClientRect();
+        const cellRect = cell1.getBoundingClientRect();
+        token.style.left = (cellRect.left - boardRect.left - 44) + 'px';
+        token.style.top = (cellRect.top - boardRect.top + cellRect.height / 2 - 22) + 'px';
+        return;
+      }
+      const cell = cells[cellNum];
+      const boardRect = board.getBoundingClientRect();
+      const cellRect = cell.getBoundingClientRect();
+      token.style.left = (cellRect.left - boardRect.left + cellRect.width / 2 - 19) + 'px';
+      token.style.top = (cellRect.top - boardRect.top + cellRect.height / 2 - 22) + 'px';
+    }
+
+    // --- Dice rendering ---
+    function renderDice(value) {
+      const diceFace = document.getElementById('diceFace');
+      diceFace.className = `dice-face face-${value}`;
+      diceFace.innerHTML = '';
+      for (let i = 0; i < value; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        diceFace.appendChild(dot);
+      }
+    }
+
+    // --- Crypto-secure random dice ---
+    function rollDiceValue() {
+      const arr = new Uint32Array(1);
+      crypto.getRandomValues(arr);
+      return (arr[0] % 6) + 1;
+    }
+
+    // --- Roll logic ---
+    async function roll() {
+      if (isRolling) return;
+      if (playerPos >= TOTAL_SQUARES) {
+        playerPos = 0;
+        usedSnakes.clear();
+        triviaScore = 0;
+        positionToken(0);
+        document.getElementById('scoreDisplay').textContent = '0';
+        diceRolls = 0; document.getElementById("rollsDisplay").textContent = "0";
+        document.getElementById('status').textContent = 'New game! Roll again.';
+        showRandomDYK();
+        return;
+      }
+
+      isRolling = true;
+      diceRolls++;
+      document.getElementById('rollsDisplay').textContent = diceRolls;
+      const btn = document.getElementById('rollBtn');
+      const dice = document.getElementById('dice');
+      const status = document.getElementById('status');
+      btn.disabled = true;
+      dice.classList.add('rolling');
+
+      // Animate dice for 600ms
+      const animInterval = setInterval(() => {
+        renderDice(rollDiceValue());
+      }, 80);
+
+      await new Promise(r => setTimeout(r, 600));
+      clearInterval(animInterval);
+      dice.classList.remove('rolling');
+
+      const value = rollDiceValue();
+      renderDice(value);
+
+      let newPos = playerPos + value;
+      if (newPos > TOTAL_SQUARES) {
+        status.textContent = `Rolled ${value} — can't move past ${TOTAL_SQUARES}. Stay at ${playerPos}.`;
+        isRolling = false;
+        btn.disabled = false;
+        return;
+      }
+
+      // Move step by step
+      for (let i = playerPos + 1; i <= newPos; i++) {
+        playerPos = i;
+        positionToken(i);
+        await new Promise(r => setTimeout(r, 150));
+      }
+
+      // Check win
+      if (playerPos === TOTAL_SQUARES) {
+        status.textContent = `🎉 Rolled ${value} — You reached ${TOTAL_SQUARES}! You WIN!`;
+        isRolling = false;
+        btn.disabled = false;
+        showWinScreen();
+        return;
+      }
+
+      // Check snake or ladder
+      const landedSquare = playerPos;
+      if (snakes[playerPos] && !usedSnakes.has(playerPos)) {
+        const from = playerPos;
+        usedSnakes.add(from);
+        status.textContent = `Rolled ${value} → landed on ${from}... 🐍 Snake! Sliding to ${snakes[from]} (-1 point)`;
+        triviaScore = Math.max(0, triviaScore - 1);
+        document.getElementById('scoreDisplay').textContent = `${triviaScore}`;
+        await new Promise(r => setTimeout(r, 500));
+        playerPos = snakes[from];
+        positionToken(playerPos);
+      } else if (snakes[playerPos] && usedSnakes.has(playerPos)) {
+        status.textContent = `Rolled ${value} → landed on ${playerPos}. Snake already used — safe!`;
+      } else if (ladders[playerPos]) {
+        const from = playerPos;
+        status.textContent = `Rolled ${value} → landed on ${from}... 🪜 Ladder! Climbing to ${ladders[from]} (+5 points)`;
+        triviaScore += 5;
+        document.getElementById('scoreDisplay').textContent = `${triviaScore}`;
+        await new Promise(r => setTimeout(r, 500));
+        playerPos = ladders[from];
+        positionToken(playerPos);
+      } else {
+        status.textContent = `Rolled ${value} — moved to ${playerPos}`;
+      }
+
+      isRolling = false;
+      btn.disabled = false;
+
+      // Show Did You Know fact for landed square or destination
+      showDYK(landedSquare);
+      if (landedSquare !== playerPos) showDYK(playerPos);
+
+      // Check trivia square (based on where player originally landed, not after snake/ladder)
+      if (TRIVIA_SQUARES.has(landedSquare) && landedSquare !== TOTAL_SQUARES) {
+        showTrivia(status, btn);
+      }
+    }
+
+    // --- Trivia system ---
+    const TRIVIA_QUESTIONS = [
+      { q: 'What percentage of enterprises worldwide had adopted AI in at least one critical business function by 2026?', opts: ['65%', '72%', '88%', '94%'], ans: 2 },
+      { q: 'By what percentage does generative AI improve employee productivity on average?', opts: ['15%', 'More than 30%', '45%', '60%'], ans: 1 },
+      { q: 'What year was Amazon Bedrock launched?', opts: ['2021', '2022', '2023', '2024'], ans: 2 },
+      { q: 'What is the projected global AI spending for 2026?', opts: ['$500 billion', '$1 trillion', '$2 trillion', '$3 trillion'], ans: 2 },
+      { q: 'How many stages are in the AWS Working Backwards process?', opts: ['3 stages', '4 stages', '5 stages', '6 stages'], ans: 2 },
+      { q: 'What is the #1 challenge organizations face when implementing AI technology?', opts: ['Lack of talent', 'Data quality issues', 'Cost', 'Integration complexity'], ans: 2 },
+      { q: 'What does RAG stand for in the context of Amazon Bedrock Knowledge Bases?', opts: ['Rapid Application Generation', 'Retrieval Augmented Generation', 'Resource Allocation Gateway', 'Real-time Analytics Grid'], ans: 1 },
+      { q: 'According to Forrester, what percentage of large enterprises will mandate AI fluency training by 2026?', opts: ['15%', '20%', '30%', '45%'], ans: 2 },
+      { q: 'What was Amazon Q Developer previously called?', opts: ['Amazon CodeAssist', 'Amazon CodeWhisperer', 'Amazon DevHelper', 'Amazon CodeGenie'], ans: 1 },
+      { q: 'What percentage of generative AI projects are predicted to be abandoned after proof of concept by end of 2025?', opts: ['15%', '20%', '30%', '40%'], ans: 2 },
+      { q: 'Which AWS service detects personally identifiable information (PII) in text documents?', opts: ['Amazon Textract', 'Amazon Rekognition', 'Amazon Comprehend', 'Amazon Translate'], ans: 2 },
+      { q: 'What percentage of organizations say they are increasing investments in generative AI given strong value seen to date?', opts: ['45%', '54%', '67%', '78%'], ans: 2 },
+      { q: 'What feature in Amazon Bedrock helps implement safeguards for responsible AI?', opts: ['Amazon Bedrock Shields', 'Amazon Bedrock Guardrails', 'Amazon Bedrock Filters', 'Amazon Bedrock Protectors'], ans: 1 },
+      { q: "What percentage of enterprises see significant impact from AI at scale according to Accenture's 2025 report?", opts: ['Only 13%', '28%', '42%', '55%'], ans: 0 },
+      { q: 'By what percentage did worker access to AI tools increase in 2025 alone?', opts: ['25%', '35%', '50%', '65%'], ans: 2 },
+      { q: 'What are the three main capabilities of Amazon Bedrock?', opts: ['Model training, deployment, and monitoring', 'Access to foundation models via unified API, model customization tools, and security/orchestration features', 'Data processing, storage, and analytics', 'Code generation, testing, and deployment'], ans: 1 },
+      { q: 'What percentage of AI projects in proof-of-concept are abandoned before production according to 2025 data?', opts: ['20%', '30%', '46%', '55%'], ans: 2 },
+      { q: "What are the two collaboration modes available in Amazon Bedrock's multi-agent feature?", opts: ['Sequential and parallel processing', 'Fully supervisor mode and router + supervisor mode', 'Master-slave and peer-to-peer', 'Centralized and distributed'], ans: 1 },
+    ];
+
+    function showTrivia(status, btn) {
+      const overlay = document.getElementById('triviaOverlay');
+      const qEl = document.getElementById('triviaQuestion');
+      const optsEl = document.getElementById('triviaOptions');
+
+      const trivia = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+      qEl.textContent = trivia.q;
+      optsEl.innerHTML = '';
+
+      status.textContent = `Landed on a trivia square! Answer correctly for a bonus roll.`;
+
+      trivia.opts.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'trivia-opt';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => handleTriviaAnswer(i, trivia.ans, overlay, status));
+        optsEl.appendChild(btn);
+      });
+
+      overlay.classList.add('active');
+    }
+
+    function handleTriviaAnswer(selected, correct, overlay, status) {
+      const opts = document.querySelectorAll('.trivia-opt');
+      opts.forEach((o, i) => {
+        o.style.pointerEvents = 'none';
+        if (i === correct) o.classList.add('correct');
+        if (i === selected && selected !== correct) o.classList.add('wrong');
+      });
+
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        if (selected === correct) {
+          triviaScore += 3;
+          document.getElementById('scoreDisplay').textContent = `${triviaScore}`;
+          status.textContent = `✅ Correct! +3 points (Score: ${triviaScore})`;
+        } else {
+          status.textContent = '❌ Wrong answer. Continue normally.';
+        }
+      }, 1200);
+    }
+
+    // --- Fireworks & Win Screen ---
+    let fireworksAnim = null;
+
+    function getMaturityLevel(score, rolls) {
+      if (score >= 10 && rolls <= 20) return { medal: '🥇', title: 'AI-Mature Organization (Top 1%)', cls: 'gold' };
+      if (score >= 8 || rolls <= 20) return { medal: '🥈', title: 'AI-Scaling Organization', cls: 'silver' };
+      return { medal: '🥉', title: 'AI-Exploring Organization', cls: 'bronze' };
+    }
+
+    function showWinScreen() {
+      const overlay = document.getElementById('winOverlay');
+      const level = getMaturityLevel(triviaScore, diceRolls);
+      document.getElementById('winSubtitle').innerHTML = `${level.medal} ${level.title}`;
+      document.getElementById('winStats').innerHTML = `Score: <strong>${triviaScore}</strong> &nbsp;|&nbsp; Rolls: <strong>${diceRolls}</strong>`;
+      document.getElementById('winName').value = '';
+      document.getElementById('winEmail').value = '';
+      overlay.classList.add('active');
+      startFireworks();
+    }
+
+    function hideWinScreen() {
+      const overlay = document.getElementById('winOverlay');
+      overlay.classList.remove('active');
+      if (fireworksAnim) cancelAnimationFrame(fireworksAnim);
+      fireworksAnim = null;
+    }
+
+    function startFireworks() {
+      const canvas = document.getElementById('fireworksCanvas');
+      const ctx = canvas.getContext('2d');
+      const overlay = document.getElementById('winOverlay');
+      canvas.width = overlay.offsetWidth;
+      canvas.height = overlay.offsetHeight;
+
+      const streamers = [];
+      const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#F7DC6F', '#BB8FCE', '#FF8A65', '#64B5F6', '#E94560', '#2ECC71'];
+
+      // Spawn all streamers at once
+      for (let b = 0; b < 60; b++) {
+        streamers.push({
+          x: Math.random() * canvas.width,
+          y: -10 - Math.random() * 80,
+          w: 4 + Math.random() * 6,
+          h: 12 + Math.random() * 18,
+          vx: (Math.random() - 0.5) * 2,
+          vy: 1.5 + Math.random() * 2.5,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.15,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 1,
+          decay: 0.002 + Math.random() * 0.003,
+        });
+      }
+
+      function animate(time) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (streamers.length === 0) {
+          cancelAnimationFrame(fireworksAnim);
+          fireworksAnim = null;
+          return;
+        }
+
+        for (let i = streamers.length - 1; i >= 0; i--) {
+          const s = streamers[i];
+          s.x += s.vx + Math.sin(time * 0.003 + i) * 0.5;
+          s.y += s.vy;
+          s.rot += s.rotSpeed;
+          s.life -= s.decay;
+
+          if (s.life <= 0 || s.y > canvas.height + 20) {
+            streamers.splice(i, 1);
+            continue;
+          }
+
+          ctx.save();
+          ctx.translate(s.x, s.y);
+          ctx.rotate(s.rot);
+          ctx.globalAlpha = s.life;
+          ctx.fillStyle = s.color;
+          // Ribbon shape
+          ctx.beginPath();
+          ctx.moveTo(-s.w / 2, -s.h / 2);
+          ctx.quadraticCurveTo(s.w / 2, -s.h / 4, s.w / 2, 0);
+          ctx.quadraticCurveTo(s.w / 2, s.h / 4, -s.w / 2, s.h / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+        fireworksAnim = requestAnimationFrame(animate);
+      }
+      fireworksAnim = requestAnimationFrame(animate);
+    }
+
+    // --- Did You Know facts by square ---
+    const DYK_FACTS = {
+      15: `The Pilot\u2011to\u2011Production Gap According to AWS Prescriptive Guidance, 88% of AI pilots fail to reach production, leading to what is termed "pilot fatigue - organizations become weary of spending time, money, and energy on pilots that never progress [3]. Gartner\u2019s data corroborates this, indicating that on average only about 48% of AI projects make it into production.`,
+      14: `Poor Data Quality and Readiness is the most frequently cited technical barrier. Approximately 70% of leaders cite data quality and governance as their number one technical hurdle, and data cleaning and labeling alone can represent 20\u201340% of total project budgets. Common data pitfalls include siloed data repositories, inconsistentor incomplete datasets, and lack of centralized data catalogs. AWS\u2019s own research found that 39% of respondents cite data challenges such as cleaning, integration, and storage as barriers to using generative AI [8].`,
+      7: `No Clear Business Problem represents the trap of technology\u2011first thinking. RAND Corporation research confirms that projects launched without well\u2011defined business problems or measurable success criteria are among the most likely to fail.`,
+      26: `Organizational Debt and Cultural Resistance is a pervasive but often invisible pitfall. AWS identifies organizational debt\u2014outdated processes, rigid hierarchies, and cultural resistance to change\u2014as a critical barrier, noting that "adding AI to inefficient processes won\u2019t deliver the transformation your business needs; it will just compound your organizational debt" [9].`,
+      22: `Governance as an Afterthought creates hidden risks that compound over time. Gartner specifically identifies responsible AI as an afterthought as a primary reason AI projects fail, warning that without proper AI policy, employees will bring personal AI tools to work, creating data leakage, IP risk, and compliance exposure.`,
+      11: `Unrealistic Timelines and Expectations lead to premature abandonment. Executives commonly expect AI ROI in six months, while realistic timelines are 18 to 36 months. That gap between expectation and reality leads to disillusionment and premature project cancellation. Legacy System Integration Gaps compound this problem, as enterprises consistently struggle to integrate AI with existing ERP, CRM, and workflow systems, with technical debt from legacy architectures creating bottlenecks that trap projects in pilot purgatory. Finally, Lack of Executive Sponsorship remains a structural weakness: only 22% of organizations have a visible, defined AI strategy.`,
+      3: `Value\u2011First Use Case Selection is the most powerful ladder on the board. AWS\u2019s Five V\u2019s Framework starts with "Value"\u2014working backwards from the most pressing business challenges to ensure AI solves real problems [4]. Projects thrive when organizations first identify specific challenges, align key stakeholders around these goals, and establish clear accountability for results [4]. The "Visualize" phase then defines measurable KPIs linking technical performance to business outcomes, and research shows that 72% of leaders now formally measure generative AI ROI, with three out of four seeing positive returns.`,
+      9: `Governance\u2011by\u2011Design is a transformative accelerator that turns a common pitfall into a competitive advantage. According to AWS, organizations embedding governance from day one report substantial benefits: 42% see improved business efficiency, while 34% experience increased consumer trust [5]. AWS recommends effective data governance resting on four pillars: data visibility, access control, quality assurance, and ownership [8]. An end\u2011to\u2011end data management and governance strategy covering ingestion, storage, querying, analysis, and AI/ML model operations is essential [10].`,
+      13: `Investing in People and Change Management is perhaps the most counterintuitive but critical accelerator. Field experience suggests that approximately 70% of AI investment should go toward people\u2014change management, training, and teaching how to prompt\u2014with roughly 20% going to tools and only about 10% to the models themselves. Organizations that invert this ratio consistently fail. The AWS OCA 6\u2011Point Framework guides transformation through identifying and mobilizing key leaders, assessing organizational impacts, designing training plans, and making culture change stick via feedback loops and sustainability planning [7]. AWS also recommends building "ML Fluency"\u2014a shared language and mental model across the organization\u2014and identifying internal AI champions as early accelerators [11].`,
+      17: `Cross\u2011Functional Teams and Structural Transformation accelerate adoption by breaking down the silos that create snakes. AWS emphasizes aligning key stakeholders, establishing clear accountability, and pairing technical and business teams [4]. Organizations should rethink processes, reduce unnecessary management layers, and build a culture of continuous learning alongside AI implementation [9].`,
+      21: `Phased Maturity Model Approach provides the strategic roadmap that prevents pilot fatigue. AWS\u2019s generative AI maturity model offers a structured, phased approach to navigate adoption complexity, ensuring organizations do not overlook critical steps or best practices [3]. The progression spans four distinct levels, beginning with basic understanding and culminating in complete organizational transformation [12]. Rapid Validation Pathways demonstrate what is possible with the right approach: AWS\u2019s Generative AI Innovation Center achieved 65% of customer projects moving from concept to production, with some launching in just 45 days [4].`,
+      23: `Well\u2011Architected AI Review serves as the final ladder before the finish line. The AWS Well\u2011Architected Generative AI Lens covers critical aspects including operational excellence, security, reliability, performance efficiency, cost optimization, and sustainability [13]. At re:Invent 2025, AWS launched three AI\u2011specific lenses\u2014a new Responsible AI Lens plus updated Machine Learning and Generative AI Lenses\u2014providing comprehensive architectural best practices [6].`,
+    };
+
+    const DYK_SOURCES = {
+      1: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/overview-levels.html',
+      2: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/overview-aspects.html',
+      3: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/introduction.html',
+      4: 'https://aws.amazon.com/blogs/machine-learning/beyond-pilots-a-proven-framework-for-scaling-ai-to-production',
+      5: 'https://aws.amazon.com/blogs/machine-learning/governance-by-design-the-essential-guide-for-successful-ai-scaling',
+      6: 'https://aws.amazon.com/blogs/architecture/architecting-for-ai-excellence-aws-launches-three-well-architected-lenses-at-reinvent-2025/',
+      7: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/oca-framework-make-culture-change-stick/introduction.html',
+      8: 'https://aws.amazon.com/blogs/enterprise-strategy/data-governance-in-the-age-of-generative-ai/',
+      9: 'https://aws.amazon.com/blogs/machine-learning/beyond-the-technology-workforce-changes-for-ai',
+      10: 'https://aws.amazon.com/blogs/big-data/data-governance-in-the-age-of-generative-ai/',
+      11: 'https://docs.aws.amazon.com/whitepapers/latest/aws-caf-for-ai/people-perspective-culture-and-change-towards-aiml-first.html',
+      12: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-gen-ai-maturity-model/overview.html',
+      13: 'https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html',
+      14: 'https://docs.aws.amazon.com/whitepapers/latest/aws-caf-for-ai/aws-caf-for-ai.html',
+      15: 'https://aws.amazon.com/bedrock/security-privacy-responsible-ai/',
+      16: 'https://aws.amazon.com/blogs/aws/introducing-amazon-bedrock-agentcore-securely-deploy-and-operate-ai-agents-at-any-scale/',
+      17: 'https://aws.amazon.com/blogs/publicsector/new-ai-ml-solutions-in-aws-govcloud-us-underpin-responsible-innovation/',
+      18: 'https://aws.amazon.com/blogs/migration-and-modernization/move-to-ai-pathway/',
+      19: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-data-considerations-gen-ai/journey.html',
+      20: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-enterprise-ready-gen-ai-platform/introduction.html',
+    };
+
+    const BOLD_PHRASES = [
+      'The Pilot\u2011to\u2011Production Gap',
+      'Poor Data Quality and Readiness',
+      'No Clear Business Problem',
+      'Organizational Debt and Cultural Resistance',
+      'Governance as an Afterthought',
+      'Unrealistic Timelines and Expectations',
+      'Legacy System Integration Gaps',
+      'Lack of Executive Sponsorship',
+      'Value\u2011First Use Case Selection',
+      'Governance\u2011by\u2011Design',
+      'Investing in People and Change Management',
+      'Cross\u2011Functional Teams and Structural Transformation',
+      'Phased Maturity Model Approach',
+      'Well\u2011Architected AI Review',
+    ];
+
+    function showDYK(square) {
+      const el = document.getElementById('dykContent');
+      if (DYK_FACTS[square]) {
+        let fact = DYK_FACTS[square];
+        // Bold key phrases
+        BOLD_PHRASES.forEach(phrase => {
+          if (fact.includes(phrase)) {
+            fact = fact.replace(phrase, `<strong>${phrase}</strong>`);
+          }
+        });
+        // Extract citation numbers from [n] and [n, m] patterns
+        const citeNums = new Set();
+        const regex = /\[(\d+(?:,\s*\d+)*)\]/g;
+        let match;
+        while ((match = regex.exec(fact)) !== null) {
+          match[1].split(',').forEach(n => citeNums.add(parseInt(n.trim())));
+        }
+        // Add snake or ladder icon prefix
+        let icon = '';
+        if (snakes[square]) icon = '<span class="dyk-icon">🐍</span> ';
+        else if (ladders[square]) icon = '<span class="dyk-icon">🪜</span> ';
+
+        // Build HTML
+        let html = '<p>' + icon + fact.replace(/\[(\d+(?:,\s*\d+)*)\]/g, '<sup class="cite">[$1]</sup>') + '</p>';
+        if (citeNums.size > 0) {
+          html += '<div class="dyk-sources"><strong>Sources:</strong>';
+          [...citeNums].sort((a, b) => a - b).forEach(n => {
+            if (DYK_SOURCES[n]) {
+              html += `<div class="dyk-source">[${n}] <a href="${DYK_SOURCES[n]}" target="_blank" rel="noopener">${DYK_SOURCES[n]}</a></div>`;
+            }
+          });
+          html += '</div>';
+        }
+        el.innerHTML = html;
+      }
+    }
+
+    function showRandomDYK() {
+      const keys = Object.keys(DYK_FACTS);
+      showDYK(Number(keys[Math.floor(Math.random() * keys.length)]));
+    }
+
+    document.getElementById('rollBtn').addEventListener('click', roll);
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      playerPos = 0;
+      usedSnakes.clear();
+      triviaScore = 0;
+      positionToken(0);
+      renderDice(1);
+      document.getElementById('scoreDisplay').textContent = '0';
+      diceRolls = 0; document.getElementById("rollsDisplay").textContent = "0";
+      document.getElementById('status').textContent = 'Game reset! Roll to start.';
+      showRandomDYK();
+    });
+    document.getElementById('dice').addEventListener('click', roll);
+    document.getElementById('dice').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') roll();
+    });
+    document.getElementById('triviaClose').addEventListener('click', () => {
+      document.getElementById('triviaOverlay').classList.remove('active');
+    });
+    document.getElementById('howToPlayBtn').addEventListener('click', () => {
+      document.getElementById('htpOverlay').classList.add('active');
+    });
+    document.getElementById('htpClose').addEventListener('click', () => {
+      document.getElementById('htpOverlay').classList.remove('active');
+    });
+    document.getElementById('winSave').addEventListener('click', () => {
+      const name = document.getElementById('winName').value.trim() || 'Player';
+      const email = document.getElementById('winEmail').value.trim() || '';
+      const entries = JSON.parse(localStorage.getItem('cloudClimbLeaderboard') || '[]');
+      entries.push({
+        name,
+        email,
+        score: triviaScore,
+        rolls: diceRolls,
+        date: new Date().toISOString(),
+      });
+      localStorage.setItem('cloudClimbLeaderboard', JSON.stringify(entries));
+      hideWinScreen();
+      playerPos = 0;
+      usedSnakes.clear();
+      triviaScore = 0;
+      positionToken(0);
+      renderDice(1);
+      document.getElementById('scoreDisplay').textContent = '0';
+      diceRolls = 0; document.getElementById("rollsDisplay").textContent = "0";
+      document.getElementById('dykContent').innerHTML = '';
+      document.getElementById('status').textContent = 'Score saved! Roll to start a new game.';
+      showRandomDYK();
+    });
+    document.getElementById('winDismiss').addEventListener('click', () => {
+      hideWinScreen();
+    });
+
+    // Initial
+    renderDice(1);
+    positionToken(0);
+    // Show a random DYK at start
+    showRandomDYK();
+
+  </script>
+</body>
+</html>

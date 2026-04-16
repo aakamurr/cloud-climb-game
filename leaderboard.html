@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Cloud Climb - Leaderboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a2a4a; color: #eee; padding: 40px 20px; }
+    h1 { text-align: center; color: #FFD700; margin-bottom: 6px; font-size: 28px; }
+    h2 { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 32px; font-weight: 400; }
+    .board { max-width: 600px; margin: 0 auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #1e4673; color: #fff; padding: 12px 16px; text-align: left; font-size: 13px;
+         text-transform: uppercase; letter-spacing: 1px; }
+    th:first-child { border-radius: 10px 0 0 0; }
+    th:last-child { border-radius: 0 10px 0 0; }
+    td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+    tr:hover td { background: rgba(100,181,246,0.1); }
+    .rank { font-weight: 800; color: #FFD700; width: 50px; }
+    .rank-2 { color: #C0C0C0; }
+    .rank-3 { color: #CD7F32; }
+</style>
+</head>
+<body>
+  <h1>🏆 Leaderboard</h1>
+  <h2>The Cloud Climb — AI Edition</h2>
+  <div class="board">
+    <table>
+      <thead><tr><th>Rank</th><th>Player</th><th>Email</th><th>Score</th><th>Rolls</th></tr></thead>
+      <tbody id="lbBody"></tbody>
+    </table>
+    <p id="empty" style="text-align:center;color:#888;margin-top:40px;display:none">No games played yet. Go play!</p>
+  </div>
+  <div style="text-align:center;margin-top:24px">
+    <button onclick="if(confirm('Clear all leaderboard data?')){localStorage.removeItem('cloudClimbLeaderboard');location.reload()}" 
+      style="background:none;border:1px solid #555;color:#888;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px">
+      Clear Data
+    </button>
+  </div>
+  <script>
+    const entries = JSON.parse(localStorage.getItem('cloudClimbLeaderboard') || '[]');
+    const tbody = document.getElementById('lbBody');
+    const empty = document.getElementById('empty');
+    if (entries.length === 0) {
+      empty.style.display = 'block';
+    } else {
+      // Sort by score desc, then rolls asc
+      entries.sort((a, b) => b.score - a.score || (a.rolls || 0) - (b.rolls || 0));
+      entries.forEach((e, i) => {
+        const tr = document.createElement('tr');
+        const rankClass = i === 0 ? 'rank' : i === 1 ? 'rank rank-2' : i === 2 ? 'rank rank-3' : 'rank';
+        tr.innerHTML = `<td class="${rankClass}">${i + 1}</td><td>${e.name}</td><td>${e.email || '-'}</td><td>${e.score}</td><td>${e.rolls || '-'}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
