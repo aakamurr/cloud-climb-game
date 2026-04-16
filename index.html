@@ -1575,7 +1575,14 @@
     });
     document.getElementById('winSave').addEventListener('click', () => {
       const name = document.getElementById('winName').value.trim() || 'Player';
-      const email = document.getElementById('winEmail').value.trim() || '';
+      const email = document.getElementById('winEmail').value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (email && !emailRegex.test(email)) {
+        document.getElementById('winEmail').style.borderColor = '#e94560';
+        document.getElementById('winEmail').setAttribute('placeholder', 'Please enter a valid email');
+        return;
+      }
+      document.getElementById('winEmail').style.borderColor = '';
       const entries = JSON.parse(localStorage.getItem('cloudClimbLeaderboard') || '[]');
       entries.push({
         name,

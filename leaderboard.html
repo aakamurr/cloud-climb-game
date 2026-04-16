@@ -24,11 +24,11 @@
 </style>
 </head>
 <body>
-  <h1>🏆 Leaderboard</h1>
+  <h1>Leaderboard</h1>
   <h2>The Cloud Climb — AI Edition</h2>
   <div class="board">
     <table>
-      <thead><tr><th>Rank</th><th>Player</th><th>Email</th><th>Score</th><th>Rolls</th></tr></thead>
+      <thead><tr><th>Rank</th><th>Player</th><th>Email</th><th>Score</th><th>Rolls</th><th>Played on</th></tr></thead>
       <tbody id="lbBody"></tbody>
     </table>
     <p id="empty" style="text-align:center;color:#888;margin-top:40px;display:none">No games played yet. Go play!</p>
@@ -39,6 +39,88 @@
       Clear Data
     </button>
   </div>
+
+  <div class="winner-section">
+    <h3>Random Winner Selector</h3>
+    <div class="winner-buttons">
+      <button class="winner-btn" onclick="pickWinner(12)">Winner 12:00</button>
+      <button class="winner-btn" onclick="pickWinner(14)">Winner 14:00</button>
+      <button class="winner-btn" onclick="pickWinner(16)">Winner 16:00</button>
+    </div>
+    <div id="winnerResult" class="winner-result"></div>
+  </div>
+
+  <style>
+    .winner-section {
+      max-width: 600px;
+      margin: 32px auto 0;
+      background: rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+    }
+    .winner-section h3 {
+      color: #FFD700;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+    .winner-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .winner-btn {
+      padding: 10px 24px;
+      background: #1e4673;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .winner-btn:hover { background: #2d5f94; }
+    .winner-result {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .winner-card {
+      background: rgba(255,215,0,0.1);
+      border: 1px solid #FFD700;
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: inline-block;
+    }
+    .winner-card .winner-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: #FFD700;
+    }
+    .winner-card .winner-email {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+    .winner-card .winner-meta {
+      font-size: 12px;
+      color: #888;
+      margin-top: 6px;
+    }
+    .no-players {
+      color: #888;
+      font-size: 14px;
+    }
+    @keyframes slotSpin {
+      0% { opacity: 0.3; transform: translateY(-4px); }
+      50% { opacity: 1; transform: translateY(2px); }
+      100% { opacity: 0.3; transform: translateY(-4px); }
+    }
+    .spinning { animation: slotSpin 0.15s infinite; }
+  </style>
   <script>
     const entries = JSON.parse(localStorage.getItem('cloudClimbLeaderboard') || '[]');
     const tbody = document.getElementById('lbBody');
@@ -51,9 +133,55 @@
       entries.forEach((e, i) => {
         const tr = document.createElement('tr');
         const rankClass = i === 0 ? 'rank' : i === 1 ? 'rank rank-2' : i === 2 ? 'rank rank-3' : 'rank';
-        tr.innerHTML = `<td class="${rankClass}">${i + 1}</td><td>${e.name}</td><td>${e.email || '-'}</td><td>${e.score}</td><td>${e.rolls || '-'}</td>`;
+        const played = e.date ? new Date(e.date).toLocaleString() : '-';
+        tr.innerHTML = `<td class="${rankClass}">${i + 1}</td><td>${e.name}</td><td>${e.email || '-'}</td><td>${e.score}</td><td>${e.rolls || '-'}</td><td>${played}</td>`;
         tbody.appendChild(tr);
       });
+    }
+    function pickWinner(hour) {
+      const all = JSON.parse(localStorage.getItem('cloudClimbLeaderboard') || '[]');
+      // Filter players by time slot
+      let startHour, endHour, slotLabel;
+      if (hour === 12) {
+        startHour = 0; endHour = 12; slotLabel = 'Before 12:00';
+      } else if (hour === 14) {
+        startHour = 12; endHour = 14; slotLabel = '12:00 – 14:00';
+      } else {
+        startHour = 14; endHour = 16; slotLabel = '14:00 – 16:00';
+      }
+
+      const eligible = all.filter(e => {
+        if (!e.date) return false;
+        const h = new Date(e.date).getHours();
+        return h >= startHour && h < endHour;
+      });
+
+      const resultEl = document.getElementById('winnerResult');
+
+      if (eligible.length === 0) {
+        resultEl.innerHTML = `<span class="no-players">No players found for ${slotLabel}</span>`;
+        return;
+      }
+
+      // Slot machine animation
+      let spins = 0;
+      const totalSpins = 20;
+      resultEl.innerHTML = `<div class="winner-card spinning"><div class="winner-name">...</div></div>`;
+
+      const spinInterval = setInterval(() => {
+        const random = eligible[Math.floor(Math.random() * eligible.length)];
+        resultEl.innerHTML = `<div class="winner-card spinning"><div class="winner-name">${random.name}</div></div>`;
+        spins++;
+        if (spins >= totalSpins) {
+          clearInterval(spinInterval);
+          const winner = eligible[Math.floor(Math.random() * eligible.length)];
+          resultEl.innerHTML = `<div class="winner-card">
+            <div class="winner-name">${winner.name}</div>
+            <div class="winner-email">${winner.email || 'No email provided'}</div>
+            <div class="winner-meta">Score: ${winner.score} | Rolls: ${winner.rolls || '-'} | Slot: ${slotLabel}</div>
+          </div>`;
+        }
+      }, 100);
     }
   </script>
 </body>
