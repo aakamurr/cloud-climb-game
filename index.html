@@ -11,7 +11,7 @@
       background: #3d4f5f;
       color: #eee;
       height: 100vh;
-      overflow: hidden;
+      overflow: auto;
     }
     .container {
       display: flex;
@@ -58,6 +58,10 @@
       border-radius: 20px;
       padding: 12px;
       text-align: center;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .right-top-split {
       display: flex;
@@ -162,6 +166,13 @@
       font-size: 10px;
       color: #888;
       margin-top: 6px;
+    }
+
+    .board-tagline {
+      font-size: 12px;
+      color: #aaa;
+      font-style: italic;
+      margin-bottom: 10px;
     }
 
     /* Board */
@@ -590,6 +601,17 @@
       letter-spacing: 0.5px;
     }
 
+    .left-top-bar {
+      background: #0c1e33;
+      border-radius: 20px;
+      padding: 14px 20px;
+      text-align: center;
+      height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
     .summit-header {
       font-size: 11px;
       color: #aaa;
@@ -619,14 +641,92 @@
       pointer-events: none;
       z-index: 5;
     }
+    /* iPad / Tablet responsive */
+    @media (max-width: 1024px) {
+      .container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding: 10px;
+        gap: 10px;
+      }
+      .left-panel {
+        margin-right: 0;
+      }
+      .left-board-panel {
+        padding: 16px;
+      }
+      .board-wrapper {
+        width: min(50vh, 420px);
+        height: min(60vh, 500px);
+      }
+      .right-panel {
+        flex-direction: row;
+        gap: 10px;
+      }
+      .right-top-panel {
+        min-height: auto;
+      }
+      .right-bottom-panel {
+        max-height: 300px;
+      }
+      .left-top-bar {
+        min-height: auto;
+        padding: 10px 16px;
+      }
+      .board-title { font-size: 20px; }
+      .cell .num { font-size: clamp(20px, 4.5vw, 44px); }
+    }
+
+    /* iPad Mini / smaller tablets */
+    @media (max-width: 820px) {
+      .right-panel {
+        flex-direction: column;
+      }
+      .board-wrapper {
+        width: min(45vh, 380px);
+        height: min(54vh, 450px);
+      }
+      .win-overlay {
+        top: 10%; left: 10%;
+        width: 80%; height: 70%;
+      }
+    }
+
+    /* Portrait iPad */
+    @media (max-width: 768px) and (orientation: portrait) {
+      .container {
+        padding: 8px;
+      }
+      .board-wrapper {
+        width: min(70vw, 400px);
+        height: min(84vw, 480px);
+      }
+      .dice { width: 54px; height: 54px; }
+      .dice-face { width: 36px; height: 36px; }
+      .dot { width: 8px; height: 8px; }
+      .roll-btn, .reset-btn { padding: 10px 20px; font-size: 14px; }
+      .board-legend { gap: 12px; }
+      .legend-item { font-size: 11px; }
+      .legend-swatch { width: 16px; height: 16px; }
+      .right-top-split { flex-direction: row; }
+      .score-display, .rolls-display { font-size: 26px; }
+      .right-panel-header { font-size: 14px; }
+      .dyk-content { font-size: 12px; }
+      .qr-code { width: 60px; height: 60px; }
+    }
+
   </style>
 </head>
 <body>
   <div class="container">
     <div class="left-panel">
-      <div class="left-board-panel">
+      <div class="left-top-bar">
         <div class="summit-header">London AWS Summit 2026</div>
         <div class="board-title">The Cloud Climb — AI Edition</div>
+        <div class="board-tagline">Roll, learn, and scale your way to AI success.</div>
+      </div>
+      <div class="left-board-panel">
         <div class="board-wrapper">
           <div class="board" id="board"></div>
           <svg class="board-overlay" id="boardOverlay"></svg>
